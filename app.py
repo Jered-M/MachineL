@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Charger le modèle TensorFlow
-MODEL_PATH = "/face.h5"  # Chemin vers le modèle réel
+MODEL_PATH = "face.h5"  # Chemin vers le modèle réel
 if os.path.exists(MODEL_PATH):
     try:
         model = tf.keras.models.load_model(MODEL_PATH)
@@ -297,4 +297,5 @@ if __name__ == '__main__':
         debug=True,
         use_reloader=False
     )
+
 
