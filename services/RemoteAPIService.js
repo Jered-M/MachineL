@@ -31,14 +31,27 @@ class RemoteAPIService {
 
   async checkConnection() {
     try {
-      const response = await fetch(`${this.API_BASE_URL}/health`, {
+      console.log('🔗 Vérification connexion API:', `${this.API_BASE_URL}health`);
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+      
+      const response = await fetch(`${this.API_BASE_URL}health`, {
         method: 'GET',
-        timeout: this.timeout,
+        signal: controller.signal,
+        headers: {
+          'Accept': 'application/json',
+        }
       });
+      
+      clearTimeout(timeoutId);
+      
+      console.log('📡 Statut réponse:', response.status);
       
       if (response.status === 200) {
         const data = await response.json();
         this.isConnected = true;
+        console.log('✅ Connexion réussie:', data);
         return data;
       } else {
         this.isConnected = false;
@@ -46,6 +59,7 @@ class RemoteAPIService {
       }
     } catch (error) {
       this.isConnected = false;
+      console.error('❌ Erreur connexion:', error.message);
       throw error;
     }
   }
@@ -76,18 +90,29 @@ class RemoteAPIService {
 
     try {
       console.log('🔍 Envoi de l\'image pour reconnaissance...');
+      console.log('📍 URL:', `${this.API_BASE_URL}recognize`);
+      console.log('📊 Taille image:', Math.round(imageBase64.length / 1024), 'KB');
       
-      const response = await fetch(`${this.API_BASE_URL}/recognize`, {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+      
+      const response = await fetch(`${this.API_BASE_URL}recognize`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
         body: JSON.stringify({ image: imageBase64 }),
-        timeout: this.timeout,
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
+      
+      console.log('📡 Statut réponse:', response.status);
+
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+        const errorData = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errorData}`);
       }
 
       const data = await response.json();
