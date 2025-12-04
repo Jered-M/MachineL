@@ -1,0 +1,38 @@
+services:
+  - type: web
+    name: machinel-api
+    env: python
+    region: us-east
+    plan: free
+    
+    # Démarrage de l'API
+    startCommand: "cd api && python app.py"
+    
+    # Variables d'environnement
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: PYTHONUNBUFFERED
+        value: "1"
+    
+    # Port
+    port: 5000
+    
+    # Healthcheck
+    healthCheckPath: /health
+    healthCheckInterval: 30
+    healthCheckTimeout: 20
+    
+    # Limite de ressources
+    numInstances: 1
+    
+    # Dépendances Python
+    buildCommand: "pip install -r api/requirements.txt"
+    
+    # Redéploiement automatique
+    autoRedeploy: true
+    
+    # Logs
+    envVars:
+      - key: RENDER_LOG_LEVEL
+        value: info
