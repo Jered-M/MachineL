@@ -17,20 +17,33 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Charger le modèle TensorFlow
-# Chemin relatif au fichier app.py
-MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "face.h5")
+# Chemins possibles à essayer
+possible_paths = [
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "face.h5"),  # api/face.h5
+    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "face.h5"),  # ../face.h5
+    "face.h5",  # Face.h5 à la racine
+]
 
-if os.path.exists(MODEL_PATH):
-    try:
-        model = tf.keras.models.load_model(MODEL_PATH)
-        logger.info(f"✅ Modèle TensorFlow chargé avec succès de {MODEL_PATH}")
-    except Exception as e:
-        logger.error(f"❌ Erreur lors du chargement du modèle: {e}")
-        model = None
-else:
-    logger.warning(f"⚠️ Modèle non trouvé à {MODEL_PATH}")
+model = None
+MODEL_PATH = None
+
+for path in possible_paths:
+    if os.path.exists(path):
+        try:
+            logger.info(f"📁 Tentative de chargement depuis: {path}")
+            model = tf.keras.models.load_model(path)
+            MODEL_PATH = path
+            logger.info(f"✅ Modèle TensorFlow chargé avec succès de {path}")
+            break
+        except Exception as e:
+            logger.error(f"❌ Erreur lors du chargement de {path}: {e}")
+            continue
+
+if model is None:
+    logger.warning("⚠️ Aucun modèle trouvé aux emplacements attendus:")
+    for path in possible_paths:
+        logger.warning(f"   - {path}")
     logger.info("Mode DEMO activé - retourne des résultats de test")
-    model = None
 
 # Classes de reconnaissance
 CLASSES = ["jered", "gracia", "Ben", "Leo"]

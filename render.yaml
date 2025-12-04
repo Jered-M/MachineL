@@ -14,6 +14,8 @@ services:
         value: production
       - key: PYTHONUNBUFFERED
         value: "1"
+      - key: GIT_LFS_SKIP_SMUDGE
+        value: "0"
     
     # Port
     port: 5000
@@ -26,8 +28,8 @@ services:
     # Limite de ressources
     numInstances: 1
     
-    # Dépendances Python
-    buildCommand: "pip install -r api/requirements.txt"
+    # Build avant démarrage
+    buildCommand: "pip install git-lfs && git lfs install && git lfs pull && pip install -r api/requirements.txt"
     
     # Redéploiement automatique
     autoRedeploy: true
