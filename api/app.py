@@ -17,26 +17,32 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Charger le modèle TensorFlow
-# Chemins possibles à essayer
+# Chemins possibles à essayer (ordre de priorité)
 possible_paths = [
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "face.h5"),  # api/face.h5
-    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "face.h5"),  # ../face.h5
-    "face.h5",  # Face.h5 à la racine
+    # Priorité 1: À la racine du projet (meilleur pour Render)
+    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "face.h5"),
+    # Priorité 2: Dans le dossier api/
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "face.h5"),
+    # Priorité 3: Face.h5 à la racine (chemin absolu)
+    "/app/face.h5",
+    "face.h5",
 ]
 
 model = None
 MODEL_PATH = None
 
 for path in possible_paths:
-    if os.path.exists(path):
+    full_path = os.path.abspath(path) if not path.startswith('/app') else path
+    if os.path.exists(full_path):
         try:
-            logger.info(f"📁 Tentative de chargement depuis: {path}")
-            model = tf.keras.models.load_model(path)
-            MODEL_PATH = path
-            logger.info(f"✅ Modèle TensorFlow chargé avec succès de {path}")
+            logger.info(f"📁 Tentative de chargement depuis: {full_path}")
+            model = tf.keras.models.load_model(full_path)
+            MODEL_PATH = full_path
+            logger.info(f"✅ Modèle TensorFlow chargé avec succès")
+            logger.info(f"   Chemin: {MODEL_PATH}")
             break
         except Exception as e:
-            logger.error(f"❌ Erreur lors du chargement de {path}: {e}")
+            logger.error(f"❌ Erreur lors du chargement de {full_path}: {e}")
             continue
 
 if model is None:
