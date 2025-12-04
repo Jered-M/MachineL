@@ -192,14 +192,39 @@ def process_image(img):
                 "timestamp": datetime.now().isoformat()
             }
         else:
-            # Mode DEMO - sans modèle
-            logger.info("Mode DEMO - Retour de résultats de test")
-            import random
+            # Mode DEMO - sans modèle, analyse basée sur l'image
+            logger.info("Mode DEMO - Analyse basée sur les caractéristiques de l'image")
             
-            # Résultats aléatoires de démo
-            name = random.choice(["jered", "gracia"])
-            confidence = random.uniform(0.85, 0.99)
+            # Analyser l'image pour déterminer le visage
+            img_array = np.array(img)
+            
+            # Calcul de caractéristiques simples
+            brightness = np.mean(img_array)  # Luminosité moyenne
+            contrast = np.std(img_array)     # Contraste
+            
+            # Hash simple de l'image pour pseudo-déterminer l'identité
+            image_hash = int(np.sum(img_array) % 1000)
+            
+            # Choix pseudo-déterministe basé sur le hash
+            if image_hash % 2 == 0:
+                name = "jered"
+                confidence = 0.82 + (image_hash % 100) / 500  # 0.82 - 0.98
+            else:
+                name = "gracia"
+                confidence = 0.75 + (image_hash % 150) / 500  # 0.75 - 0.95
+            
+            # Ajustement basé sur la luminosité
+            if brightness < 50:
+                confidence -= 0.1  # Moins confiant si sombre
+            elif brightness > 200:
+                confidence -= 0.05  # Moins confiant si très lumineux
+            
+            # Limiter la confiance entre 0 et 1
+            confidence = max(0.50, min(0.99, confidence))
             percentage = round(confidence * 100, 2)
+            
+            logger.info(f"Mode DEMO - {name} avec {percentage}% de confiance")
+            logger.info(f"  Luminosité: {brightness:.1f}, Contraste: {contrast:.1f}")
             
             response = {
                 "success": True,
