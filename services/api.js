@@ -1,4 +1,4 @@
-const BASE_URL = "https://machinel.onrender.com";
+const BASE_URL = "https://ml-api-3jf9.onrender.com";
 
 export const recognizeFaceAPI = async (base64Image) => {
   try {
