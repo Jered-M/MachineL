@@ -2,7 +2,7 @@ import * as FileSystem from 'expo-file-system';
 
 const CLASSES = ['jered', 'gracia', 'Ben', 'Leo'];
 const THRESHOLD = 0.70;
-const API_URL = 'http://10.93.6.80:5000'; // IP locale de la machine
+const API_URL = 'https://ml-api-3jf9.onrender.com'; // API Render
 
 let isConnected = false;
 

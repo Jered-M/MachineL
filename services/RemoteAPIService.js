@@ -6,10 +6,8 @@
 
 class RemoteAPIService {
   constructor() {
-    // L'adresse IP du PC local (à adapter selon votre réseau)
-    // Pour développement local: 127.0.0.1 ou localhost
-    // Sur réseau: 192.168.x.x ou utiliser l'adresse IP réelle
-    this.API_BASE_URL = 'https://machinel.onrender.com/'; // À remplacer par votre IP
+    // API URL - Nouvelle URL Render
+    this.API_BASE_URL = 'https://ml-api-3jf9.onrender.com/';
     this.FALLBACK_URL = 'http://127.0.0.1:5000';
     this.LOCAL_URL = 'http://localhost:5000';
     

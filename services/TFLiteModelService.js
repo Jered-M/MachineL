@@ -6,7 +6,7 @@ const THRESHOLD = 0.70;
 const IMG_SIZE = 224;
 
 let isApiAvailable = false;
-let apiUrl = 'http://192.168.1.x:5000'; // À personnaliser
+let apiUrl = 'https://ml-api-3jf9.onrender.com'; // URL API Render
 
 export const TFLiteModelService = {
   /**

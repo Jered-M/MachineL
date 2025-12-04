@@ -1,5 +1,5 @@
 // Configuration de l'API Flask locale
-const API_URL = 'http://10.0.2.2:5000';
+const API_URL = 'https://ml-api-3jf9.onrender.com';
 
 export const ModelService = {
   /**
