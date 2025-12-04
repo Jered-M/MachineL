@@ -6,6 +6,7 @@ import { FaceCaptureScreen } from './screens/FaceCaptureScreen';
 import { ScanningScreen } from './screens/ScanningScreen';
 import { ResultScreen } from './screens/ResultScreen';
 import APIRecognitionScreen from './screens/APIRecognitionScreen';
+import { RegisterFaceScreen } from './screens/RegisterFaceScreen';
 
 // 2. Définir la MAP des écrans DANS App.js (ou l'importer de ScreenMap.js)
 const SCREENS = {
@@ -14,6 +15,7 @@ const SCREENS = {
     Scanning: ScanningScreen,
     Result: ResultScreen,
     APIRecognition: APIRecognitionScreen,
+    RegisterFace: RegisterFaceScreen,
 };
 
 // 3. Définir l'écran initial

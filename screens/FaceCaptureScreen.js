@@ -126,10 +126,10 @@ export const FaceCaptureScreen = ({ navigation }) => {
       <View style={styles.bottomBar}>
         <TouchableOpacity 
           style={styles.cancelButton} 
-          onPress={() => navigation.goBack()}
+          onPress={() => navigation.navigate('RegisterFace')}
           disabled={isScanning}
         >
-          <Text style={styles.buttonText}>Cancel</Text>
+          <Text style={styles.buttonText}>📝 Register</Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
