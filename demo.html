@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Recognition App Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #F5F5F5;
+        }
+
+        .app {
+            max-width: 375px;
+            margin: 0 auto;
+            background-color: white;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .screen {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* Face Capture Screen */
+        .face-capture {
+            background-color: #000;
+            color: white;
+            padding: 20px;
+        }
+
+        .camera-placeholder {
+            height: 500px;
+            background: linear-gradient(45deg, #333, #666);
+            border-radius: 20px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .face-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            border: 3px solid #00D084;
+            border-radius: 50%;
+        }
+
+        .bottom-controls {
+            position: absolute;
+            bottom: 40px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .btn {
+            padding: 14px 24px;
+            border-radius: 12px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            min-height: 50px;
+            flex: 0.45;
+        }
+
+        .btn-primary {
+            background-color: #5B4BDB;
+            color: white;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid #CCCCCC;
+            color: #666666;
+        }
+
+        /* Scanning Screen */
+        .scanning {
+            background-color: #000;
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .scanning-text {
+            color: #00D084;
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-top: 20px;
+        }
+
+        /* Result Screen */
+        .result {
+            background-color: #F5F5F5;
+        }
+
+        .header {
+            background-color: #5B4BDB;
+            padding: 24px 20px;
+            text-align: center;
+        }
+
+        .header-title {
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .card {
+            background-color: white;
+            margin: 24px 20px;
+            border-radius: 20px;
+            padding: 30px 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .check-icon {
+            width: 60px;
+            height: 60px;
+            background-color: #00D084;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 36px;
+            color: white;
+        }
+
+        .congrats-text {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1A1A1A;
+            margin-bottom: 20px;
+        }
+
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50px;
+            background: linear-gradient(45deg, #5B4BDB, #7C3AED);
+            margin: 0 auto 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 36px;
+        }
+
+        .info-section {
+            margin-top: 20px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+        }
+
+        .info-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: #1A1A1A;
+        }
+
+        .info-value-highlight {
+            color: #00D084;
+            font-weight: 700;
+        }
+
+        .divider {
+            height: 1px;
+            background-color: #EEEEEE;
+        }
+
+        .btn-container {
+            padding: 24px 20px 40px;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .nav {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .nav-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            background: #f0f0f0;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .nav-btn.active {
+            background: #5B4BDB;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Face Capture Screen -->
+        <div id="face-capture" class="screen face-capture active">
+            <div class="camera-placeholder">
+                <div class="face-overlay"></div>
+                📷 Camera View
+            </div>
+            <div class="bottom-controls">
+                <button class="btn btn-outline" onclick="showScreen('face-capture')">Cancel</button>
+                <button class="btn btn-primary" onclick="showScreen('scanning')">Start</button>
+            </div>
+        </div>
+
+        <!-- Scanning Screen -->
+        <div id="scanning" class="screen scanning">
+            <div class="camera-placeholder">
+                🔍 Scanning...
+            </div>
+            <div class="scanning-text">Scanning…</div>
+            <script>
+                setTimeout(() => showScreen('result'), 3000);
+            </script>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="result" class="screen result">
+            <div class="header">
+                <div class="header-title">Recognition Result</div>
+            </div>
+
+            <div class="card">
+                <div class="check-icon">✓</div>
+                <div class="congrats-text">Congrats!</div>
+                <div class="avatar">👤</div>
+
+                <div class="info-section">
+                    <div style="font-size: 20px; font-weight: 600; margin-bottom: 20px; color: #1A1A1A;">John Doe</div>
+
+                    <div class="info-row">
+                        <span class="info-label">Employee ID</span>
+                        <span class="info-value">EMP001</span>
+                    </div>
+                    <div class="divider"></div>
+
+                    <div class="info-row">
+                        <span class="info-label">Enter Time</span>
+                        <span class="info-value">09:00 AM</span>
+                    </div>
+                    <div class="divider"></div>
+
+                    <div class="info-row">
+                        <span class="info-label">Exit Time</span>
+                        <span class="info-value">06:00 PM</span>
+                    </div>
+                    <div class="divider"></div>
+
+                    <div class="info-row">
+                        <span class="info-label">Location</span>
+                        <span class="info-value">Main Office</span>
+                    </div>
+                    <div class="divider"></div>
+
+                    <div class="info-row">
+                        <span class="info-label">Confidence</span>
+                        <span class="info-value info-value-highlight">98%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="btn-container">
+                <button class="btn btn-primary btn-full" onclick="showScreen('face-capture')">Okay</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation for demo -->
+    <div class="nav">
+        <button class="nav-btn active" onclick="showScreen('face-capture')">Capture</button>
+        <button class="nav-btn" onclick="showScreen('scanning')">Scanning</button>
+        <button class="nav-btn" onclick="showScreen('result')">Result</button>
+    </div>
+
+    <script>
+        function showScreen(screenId) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+
+            // Show selected screen
+            document.getElementById(screenId).classList.add('active');
+
+            // Update nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>

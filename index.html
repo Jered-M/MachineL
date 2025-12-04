@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Recognition App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                max-width: 100%;
+                border-radius: 15px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            }
+
+            body {
+                padding: 5px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                border-radius: 10px;
+            }
+
+            .header {
+                padding: 30px 15px !important;
+            }
+
+            .header h1 {
+                font-size: 24px !important;
+            }
+
+            .screen {
+                padding: 25px 15px !important;
+            }
+
+            .button {
+                padding: 12px 20px !important;
+                font-size: 14px !important;
+            }
+
+            .user-avatar {
+                width: 120px !important;
+                height: 120px !important;
+                font-size: 60px !important;
+            }
+
+            .camera-placeholder {
+                height: 250px !important;
+            }
+
+            .confidence-score {
+                font-size: 40px !important;
+            }
+
+            .camera-icon {
+                font-size: 40px !important;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .header h1 {
+                font-size: 20px !important;
+            }
+
+            .screen h2 {
+                font-size: 20px !important;
+            }
+
+            .button {
+                padding: 10px 15px !important;
+                font-size: 13px !important;
+                margin: 6px 3px !important;
+            }
+
+            .user-avatar {
+                width: 100px !important;
+                height: 100px !important;
+                font-size: 50px !important;
+            }
+
+            .camera-placeholder {
+                height: 200px !important;
+            }
+
+            .info-label, .info-value {
+                font-size: 13px !important;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(20px, 20px); }
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+            font-weight: 700;
+        }
+
+        .header p {
+            opacity: 0.95;
+            font-size: 15px;
+            position: relative;
+            z-index: 1;
+            letter-spacing: 0.5px;
+        }
+
+        .screen {
+            display: none;
+            padding: 40px 25px;
+            text-align: center;
+            animation: fadeIn 0.4s ease-in;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        #captureScreen {
+            padding: 15px;
+            gap: 10px;
+        }
+
+        #captureScreen .badge {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+
+        #captureScreen .camera-placeholder {
+            flex: 1;
+            height: auto;
+            margin: 50px 0 10px 0;
+            border: none;
+        }
+
+        #captureScreen h2 {
+            position: absolute;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            margin: 0;
+            z-index: 10;
+        }
+
+        #captureScreen .button-group {
+            position: absolute;
+            bottom: 20px;
+            left: 15px;
+            right: 15px;
+            width: calc(100% - 30px);
+            margin: 0;
+            gap: 10px;
+        }
+
+        #scanningScreen {
+            padding: 0;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #scanningScreen .camera-placeholder {
+            flex: 1;
+            height: auto;
+            margin: 0;
+            border: none;
+        }
+
+        .user-avatar {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            margin: 30px auto;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 80px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            animation: scaleIn 0.5s ease-out;
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .user-info {
+            background: linear-gradient(135deg, #F8F9FF 0%, #F0F2FF 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin: 25px 0;
+            border-left: 5px solid #667eea;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.15);
+            align-items: center;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 14px;
+            text-align: left;
+            flex: 1;
+        }
+
+        .info-value {
+            color: #333;
+            font-weight: 500;
+            font-size: 15px;
+            text-align: right;
+            flex: 1;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 12px 6px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .button:active {
+            transform: translateY(-1px);
+        }
+
+        .button-secondary {
+            background: #E8EAF6;
+            color: #667eea;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .button-secondary:hover {
+            background: #D8DEEF;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .camera-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            border-radius: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            margin: 0;
+            position: relative;
+            overflow: hidden;
+            border: none;
+        }
+
+        .camera-placeholder::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(102, 126, 234, 0.1), transparent 70%);
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.7; }
+        }
+
+        .camera-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .camera-text {
+            position: relative;
+            z-index: 1;
+            font-size: 18px;
+        }
+
+        .scanning {
+            animation: pulse-scan 2s infinite;
+        }
+
+        @keyframes pulse-scan {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .confidence-score {
+            font-size: 56px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 25px 0;
+        }
+
+        .status {
+            padding: 16px 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .status.success {
+            background: linear-gradient(135deg, #D4EDDA 0%, #C3E9CB 100%);
+            color: #155724;
+            border-left: 5px solid #28a745;
+        }
+
+        .status.error {
+            background: linear-gradient(135deg, #F8D7DA 0%, #F5C6CB 100%);
+            color: #721C24;
+            border-left: 5px solid #dc3545;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .button-group button {
+            flex: 1;
+            min-width: 140px;
+        }
+
+        @media (max-width: 480px) {
+            .button-group {
+                gap: 8px;
+                margin-top: 15px;
+            }
+
+            .button-group button {
+                min-width: 100px;
+                flex-shrink: 1;
+            }
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(102, 126, 234, 0.2);
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Face Recognition</h1>
+            <p>Reconnaissance faciale intelligente</p>
+        </div>
+
+        <!-- Screen 1: Camera Full Screen -->
+        <div class="screen active" id="captureScreen">
+            <div class="camera-placeholder">
+                <div class="camera-icon">📷</div>
+            </div>
+            <div class="button-group">
+                <button class="button" onclick="goToScanning()">🔍 Scanner</button>
+            </div>
+        </div>
+
+        <!-- Screen 2: Scanning Full Screen -->
+        <div class="screen" id="scanningScreen">
+            <div class="camera-placeholder scanning">
+                <div class="loading-spinner"></div>
+            </div>
+            <div style="position: absolute; bottom: 20px; left: 0; right: 0; text-align: center; color: white;">
+                <p style="font-size: 16px; font-weight: 600;">Reconnaissance en cours...</p>
+                <p style="font-size: 14px; opacity: 0.8; margin-top: 5px;">Veuillez patienter</p>
+            </div>
+        </div>
+
+        <!-- Screen 3: Results -->
+        <div class="screen" id="resultScreen">
+            <div class="badge">✅ Résultats</div>
+            <h2>Reconnaissance validée</h2>
+            
+            <div class="user-avatar">
+                👤
+            </div>
+
+            <div class="user-info">
+                <div class="info-row">
+                    <span class="info-label">👤 Nom complet:</span>
+                    <span class="info-value">Sarah Johnson</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">🆔 ID Employé:</span>
+                    <span class="info-value">EMP-2024-001</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">⏰ Heure entrée:</span>
+                    <span class="info-value">09:30 AM</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">🚪 Heure sortie:</span>
+                    <span class="info-value">05:45 PM</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">📍 Localisation:</span>
+                    <span class="info-value">Bâtiment A - 3e étage</span>
+                </div>
+            </div>
+
+            <div class="status success">
+                ✓ Reconnaissance validée avec succès
+            </div>
+
+            <div style="margin: 20px 0;">
+                <p style="color: #999; font-size: 14px; margin-bottom: 10px;">Confiance de reconnaissance</p>
+                <div class="confidence-score">98.5%</div>
+                <div style="width: 100%; height: 8px; background: #E8EAF6; border-radius: 4px; overflow: hidden;">
+                    <div style="width: 98.5%; height: 100%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); border-radius: 4px;"></div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="button" onclick="goToCapture()">🔄 Nouvelle capture</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let cameraStream = null;
+        let videoElement = null;
+        let canvasElement = null;
+        let capturedImage = null;
+
+        // Initialiser la caméra au démarrage
+        async function initializeCamera() {
+            try {
+                // Demander accès à la caméra
+                cameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: { 
+                        facingMode: 'user',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: false
+                });
+
+                // Créer vidéo element
+                videoElement = document.createElement('video');
+                videoElement.srcObject = cameraStream;
+                videoElement.autoplay = true;
+                videoElement.playsinline = true;
+                videoElement.style.width = '100%';
+                videoElement.style.height = '100%';
+                videoElement.style.objectFit = 'cover';
+                videoElement.style.borderRadius = '0px';
+
+                // Créer canvas caché pour capturer la photo
+                canvasElement = document.createElement('canvas');
+                canvasElement.style.display = 'none';
+
+                // Remplacer le placeholder par la vidéo
+                const cameraPlaceholder = document.querySelector('#captureScreen .camera-placeholder');
+                cameraPlaceholder.innerHTML = '';
+                cameraPlaceholder.appendChild(videoElement);
+                document.body.appendChild(canvasElement);
+
+                console.log("✅ Caméra activée avec succès!");
+            } catch (error) {
+                console.error("❌ Erreur accès caméra:", error);
+                alert("Impossible d'accéder à la caméra. Vérifiez les permissions.");
+            }
+        }
+
+        function capturePhoto() {
+            if (!videoElement || !canvasElement) return;
+
+            // Définir les dimensions du canvas
+            canvasElement.width = videoElement.videoWidth;
+            canvasElement.height = videoElement.videoHeight;
+
+            // Capturer la photo
+            const context = canvasElement.getContext('2d');
+            context.drawImage(videoElement, 0, 0);
+            
+            // Sauvegarder l'image
+            capturedImage = canvasElement.toDataURL('image/jpeg');
+            console.log("📸 Photo capturée!");
+
+            return capturedImage;
+        }
+
+        function stopCamera() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+        }
+
+        function goToCapture() {
+            showScreen('captureScreen');
+            initializeCamera();
+        }
+
+        function goToScanning() {
+            // Capturer la photo
+            capturePhoto();
+            
+            stopCamera();
+            showScreen('scanningScreen');
+            
+            // Simuler l'analyse pendant 3 secondes
+            setTimeout(() => goToResult(), 3000);
+        }
+
+        function goToResult() {
+            showScreen('resultScreen');
+            
+            // Afficher la photo capturée si disponible
+            if (capturedImage) {
+                const resultAvatar = document.querySelector('#resultScreen .user-avatar');
+                resultAvatar.innerHTML = '';
+                const img = document.createElement('img');
+                img.src = capturedImage;
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.objectFit = 'cover';
+                img.style.borderRadius = '50%';
+                resultAvatar.appendChild(img);
+            }
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // Initialiser la caméra au chargement
+        window.addEventListener('load', () => {
+            console.log("🎯 Application Face Recognition chargée!");
+            initializeCamera();
+        });
+
+        // Arrêter la caméra en quittant
+        window.addEventListener('beforeunload', () => {
+            stopCamera();
+        });
+    </script>
+</body>
+</html>

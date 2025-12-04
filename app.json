@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "Face Recognition",
+    "slug": "face-recognition-app",
+    "version": "1.0.0",
+    "sdkVersion": "52.0.0",
+    "bridgeless": false,
+    "newArchEnabled": true,
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTabletMode": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses your camera for face recognition"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#5B4BDB"
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.anonymous.facerecognitionapp"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
+
