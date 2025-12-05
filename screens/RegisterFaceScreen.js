@@ -7,16 +7,18 @@ import {
   TextInput,
   Alert,
   ActivityIndicator,
+  ScrollView,
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Colors } from '../constants/Colors';
-import { registerFaceAPI } from '../services/api';
+import { registerFaceAPI, trainModelAPI } from '../services/api';
 
 export const RegisterFaceScreen = ({ navigation }) => {
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef(null);
   const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isTraining, setIsTraining] = useState(false);
 
   const handleRegister = async () => {
     if (!name.trim()) {
@@ -49,10 +51,44 @@ export const RegisterFaceScreen = ({ navigation }) => {
     }
   };
 
+  const handleTrainModel = async () => {
+    Alert.alert(
+      'Entrainement du modele',
+      'Cela peut prendre 5-10 minutes. Continuer?',
+      [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'Entrainer',
+          onPress: async () => {
+            try {
+              setIsTraining(true);
+              
+              // Appeler l'endpoint /train
+              const result = await trainModelAPI();
+              
+              if (result.success) {
+                Alert.alert(
+                  'Succes!',
+                  `Modele entraine\nImages: ${result.total_images}\nAccuracy: ${result.accuracy_percent}`
+                );
+              } else {
+                Alert.alert('Erreur', result.error || 'Impossible d\'entrainer le modele');
+              }
+            } catch (error) {
+              Alert.alert('Erreur', error.message || 'Erreur lors de l\'entrainement');
+            } finally {
+              setIsTraining(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   if (!permission?.granted) {
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>Permission caméra requise</Text>
+        <Text style={styles.title}>Permission camera requise</Text>
         <TouchableOpacity style={styles.button} onPress={requestPermission}>
           <Text style={styles.buttonText}>Autoriser</Text>
         </TouchableOpacity>
@@ -65,33 +101,48 @@ export const RegisterFaceScreen = ({ navigation }) => {
       <CameraView style={styles.camera} ref={cameraRef} />
       
       <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Entrez votre nom"
-          placeholderTextColor="#999"
-          value={name}
-          onChangeText={setName}
-          editable={!isLoading}
-        />
-        
-        <TouchableOpacity 
-          style={[styles.button, isLoading && styles.buttonDisabled]}
-          onPress={handleRegister}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>📸 Enregistrer mon visage</Text>
-          )}
-        </TouchableOpacity>
+        <ScrollView>
+          <TextInput
+            style={styles.input}
+            placeholder="Entrez votre nom"
+            placeholderTextColor="#999"
+            value={name}
+            onChangeText={setName}
+            editable={!isLoading && !isTraining}
+          />
+          
+          <TouchableOpacity 
+            style={[styles.button, (isLoading || isTraining) && styles.buttonDisabled]}
+            onPress={handleRegister}
+            disabled={isLoading || isTraining}
+          >
+            {isLoading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Enregistrer mon visage</Text>
+            )}
+          </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={[styles.button, { backgroundColor: Colors.secondary }]}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.buttonText}>← Retour</Text>
-        </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.button, { backgroundColor: '#FF6B35' }, isTraining && styles.buttonDisabled]}
+            onPress={handleTrainModel}
+            disabled={isTraining}
+          >
+            {isTraining ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Entrainer le modele</Text>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[styles.button, { backgroundColor: Colors.secondary }]}
+            onPress={() => navigation.goBack()}
+            disabled={isTraining}
+          >
+            <Text style={styles.buttonText}>Retour</Text>
+          </TouchableOpacity>
+        </ScrollView>
       </View>
     </View>
   );

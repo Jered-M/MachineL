@@ -22,7 +22,7 @@ export const ResultScreen = ({ navigation, route }) => {
   // Default values if API returns null or undefined
   const displayData = modelResult
     ? {
-        name: modelResult.person || 'Unknown',
+        name: modelResult.name || modelResult.person || 'Unknown',
         employeeId: modelResult.employee_id || 'N/A',
         confidence:
           modelResult.confidence !== undefined ? modelResult.confidence : 0,
@@ -39,7 +39,7 @@ export const ResultScreen = ({ navigation, route }) => {
         location: '-',
       };
 
-  const isSuccess = modelResult?.success !== false && modelResult?.person;
+  const isSuccess = modelResult?.success !== false && (modelResult?.name || modelResult?.person);
   const allResults = modelResult?.allResults || [];
 
   const handleScanAgain = () => {

@@ -50,3 +50,23 @@ export const getEmployeesAPI = async () => {
     return { error: "API unreachable" };
   }
 };
+
+export const trainModelAPI = async () => {
+  try {
+    console.log("🤖 Lancement de l'entrainement du modele...");
+    
+    const response = await fetch(`${BASE_URL}/train`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await response.json();
+    console.log("✅ Entrainement terminé:", data);
+    return data;
+  } catch (error) {
+    console.error("Erreur entrainement:", error);
+    return { error: "Cannot train model" };
+  }
+};

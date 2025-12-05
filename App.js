@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, ActivityIndicator, Text } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 // 1. Importer TOUS les écrans
 import { OnboardingScreen } from './screens/OnboardingScreen';
 import { FaceCaptureScreen } from './screens/FaceCaptureScreen';
@@ -18,12 +19,51 @@ const SCREENS = {
     RegisterFace: RegisterFaceScreen,
 };
 
-// 3. Définir l'écran initial
-const INITIAL_SCREEN_NAME = 'FaceCapture'; // Vous pouvez changer cela pour 'Onboarding' si besoin
+// 3. Clé de stockage pour déterminer si c'est la première ouverture
+const FIRST_LAUNCH_KEY = 'has_seen_onboarding';
 
 export default function App() {
-    const [currentScreen, setCurrentScreen] = useState(INITIAL_SCREEN_NAME);
+    const [currentScreen, setCurrentScreen] = useState(null);
     const [screenParams, setScreenParams] = useState({});
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Vérifier si c'est la première ouverture au montage du composant
+    useEffect(() => {
+        const checkFirstLaunch = async () => {
+            try {
+                const hasSeenOnboarding = await AsyncStorage.getItem(FIRST_LAUNCH_KEY);
+                
+                if (hasSeenOnboarding === null) {
+                    // Première ouverture - afficher le Onboarding
+                    console.log('📱 Première ouverture - Affichage du Onboarding');
+                    setCurrentScreen('Onboarding');
+                    // Marquer que l'utilisateur a vu le onboarding
+                    await AsyncStorage.setItem(FIRST_LAUNCH_KEY, 'true');
+                } else {
+                    // Ouverture suivante - aller directement à FaceCapture
+                    console.log('📱 Ouverture suivante - Affichage de FaceCapture');
+                    setCurrentScreen('FaceCapture');
+                }
+            } catch (error) {
+                console.error('❌ Erreur lors de la vérification du premier lancement:', error);
+                // Par défaut, afficher FaceCapture en cas d'erreur
+                setCurrentScreen('FaceCapture');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        checkFirstLaunch();
+    }, []);
+
+    // Afficher un écran de chargement pendant la vérification
+    if (isLoading) {
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#667eea" />
+            </View>
+        );
+    }
 
     /**
      * Objet de navigation personnalisé passé à chaque composant d'écran.
@@ -73,6 +113,12 @@ export default function App() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#f5f5f5',
     },
     errorText: {
         color: 'red',
