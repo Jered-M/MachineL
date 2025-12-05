@@ -137,7 +137,7 @@ export const RegisterFaceScreen = ({ navigation }) => {
 
           <TouchableOpacity 
             style={[styles.button, { backgroundColor: Colors.secondary }]}
-            onPress={() => navigation.goBack()}
+            onPress={() => navigation.navigate('FaceCapture')}
             disabled={isTraining}
           >
             <Text style={styles.buttonText}>Retour</Text>

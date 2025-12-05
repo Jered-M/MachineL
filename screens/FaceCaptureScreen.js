@@ -24,6 +24,7 @@ export const FaceCaptureScreen = ({ navigation }) => {
   const [isScanning, setIsScanning] = useState(false);
   const [faceDetected, setFaceDetected] = useState(false);
   const [detectionConfidence, setDetectionConfidence] = useState(0);
+  const [cameraFacing, setCameraFacing] = useState('front');
 
   // simulate detection
   useEffect(() => {
@@ -33,6 +34,10 @@ export const FaceCaptureScreen = ({ navigation }) => {
     }, 1500);
     return () => clearTimeout(timer);
   }, []);
+
+  const toggleCamera = () => {
+    setCameraFacing(cameraFacing === 'front' ? 'back' : 'front');
+  };
 
   const handleStart = async () => {
     console.log("🎬 Start pressed - Capturing face...");
@@ -108,7 +113,7 @@ export const FaceCaptureScreen = ({ navigation }) => {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={Colors.background} />
 
-      <CameraView ref={cameraRef} style={styles.camera} facing="front">
+      <CameraView ref={cameraRef} style={styles.camera} facing={cameraFacing}>
         <View style={styles.overlay}>
           {/* Ovale guide */}
           <View style={styles.faceOvalGuide} />
@@ -120,6 +125,15 @@ export const FaceCaptureScreen = ({ navigation }) => {
               <Text style={styles.scanningText}>Scanning...</Text>
             </View>
           )}
+          
+          {/* Toggle Camera Button */}
+          <TouchableOpacity 
+            style={styles.toggleCameraButton}
+            onPress={toggleCamera}
+            disabled={isScanning}
+          >
+            <Text style={styles.toggleCameraText}>🔄</Text>
+          </TouchableOpacity>
         </View>
       </CameraView>
 
@@ -223,5 +237,26 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     marginTop: 10,
+  },
+
+  toggleCameraButton: {
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+
+  toggleCameraText: {
+    fontSize: 24,
   },
 });
